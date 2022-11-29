@@ -2,9 +2,9 @@ const form = document.getElementById("novoItem")
 const lista = document.getElementById("lista")
 const itens = JSON.parse(localStorage.getItem("itens")) || []
 
-itens.forEach((elemento) => {
+itens.forEach( (elemento) => {
     criaElemento(elemento)
-});
+} )
 
 form.addEventListener("submit", (evento) => {
     evento.preventDefault()
@@ -12,24 +12,24 @@ form.addEventListener("submit", (evento) => {
     const nome = evento.target.elements['nome']
     const quantidade = evento.target.elements['quantidade']
 
-    const existe = itens.find( elemento => elemento.nome === nome.value)
-    
+    const existe = itens.find( elemento => elemento.nome === nome.value )
+
     const itemAtual = {
         "nome": nome.value,
         "quantidade": quantidade.value
     }
 
-    if (existe){
+    if (existe) {
         itemAtual.id = existe.id
-
+        
         atualizaElemento(itemAtual)
 
-        itens[existe.id] = itemAtual
+        itens[itens.findIndex(elemento => elemento.id === existe.id)] = itemAtual
     } else {
-        itemAtual.id = itens.length
+        itemAtual.id = itens[itens.length -1] ? (itens[itens.length-1]).id + 1 : 0;
 
         criaElemento(itemAtual)
-    
+
         itens.push(itemAtual)
     }
 
@@ -37,39 +37,43 @@ form.addEventListener("submit", (evento) => {
 
     nome.value = ""
     quantidade.value = ""
-
 })
 
 function criaElemento(item) {
-    const novoItem = document.createElement("li") // criando elemento do tipo 'li'
-    novoItem.classList.add("item") // adicionando css no elemento criado
+    const novoItem = document.createElement("li")
+    novoItem.classList.add("item")
 
-    const numeroItem = document.createElement("strong") // criando elemento do tipo 'strong'
-    numeroItem.innerHTML = item.quantidade // inserindo quantidade na tag 'strong'
+    const numeroItem = document.createElement("strong")
+    numeroItem.innerHTML = item.quantidade
     numeroItem.dataset.id = item.id
-    novoItem.appendChild(numeroItem) // inserindo um elemento dentro de outro
-    novoItem.innerHTML += item.nome //inserindo nome na tag 'li'
-
-    novoItem.appendChild(botaoDeleta())
+    novoItem.appendChild(numeroItem)
     
+    novoItem.innerHTML += item.nome
+
+    novoItem.appendChild(botaoDeleta(item.id))
+
     lista.appendChild(novoItem)
 }
 
-function atualizaElemento(item){
+function atualizaElemento(item) {
     document.querySelector("[data-id='"+item.id+"']").innerHTML = item.quantidade
 }
 
-function botaoDeleta() {
+function botaoDeleta(id) {
     const elementoBotao = document.createElement("button")
     elementoBotao.innerText = "X"
 
     elementoBotao.addEventListener("click", function() {
-        deletaElemento(this.parentNode)
+        deletaElemento(this.parentNode, id)
     })
 
     return elementoBotao
 }
 
-function deletaElemento(tag) {
+function deletaElemento(tag, id) {
     tag.remove()
+
+    itens.splice(itens.findIndex(elemento => elemento.id === id), 1)
+
+    localStorage.setItem("itens", JSON.stringify(itens))
 }
